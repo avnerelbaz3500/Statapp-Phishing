@@ -2,3 +2,5 @@ data/adult.csv
 data/.DS_Store
 data/phishing_emails.csv
 data/merged_data.csv
+
+phishing_data.jsonl
