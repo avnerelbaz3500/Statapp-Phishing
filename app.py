@@ -13,7 +13,6 @@ vectorizer = pickle.load(open("vectorizer.pkl", "rb"))
 model = pickle.load(open("model.pkl", "rb"))
 
 def clean_text(text):
-    """ Nettoyage du texte en accord avec l'entraînement du modèle """
     try:
         text = unicodedata.normalize("NFKC", text)
     except:
