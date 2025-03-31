@@ -68,8 +68,8 @@ if st.button("Analyser"):
 import openai
 
 
-AZURE_OPENAI_ENDPOINT = "https://openaiensaeprojettutorefvillenave.openai.azure.com/openai/deployments/gpt-35-turbo-16k/chat/completions?api-version=2024-08-01-preview"
-AZURE_OPENAI_API_KEY = "6OPGBEqMdPB70zEBpQdeyxAF5G1vEV9azbjMa4rzhpLbs1mnSGyDJQQJ99BAACHrzpqXJ3w3AAABACOGcY2g"
+AZURE_OPENAI_ENDPOINT = ""
+AZURE_OPENAI_API_KEY = ""
 AZURE_DEPLOYMENT_NAME = "gpt-35-turbo-16k" 
 AZURE_API_VERSION = "2024-08-01-preview"  
 
