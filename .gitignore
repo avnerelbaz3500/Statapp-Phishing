@@ -9,3 +9,4 @@ data/Enron.csv
 data/merged_data.csv.zip
 data/adult.data.csv
 models/vectorizer.pkl
+models/filtered_phishing_emails.csv
