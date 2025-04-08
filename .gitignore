@@ -11,3 +11,4 @@ data/adult.data.csv
 models/vectorizer.pkl
 models/filtered_phishing_emails.csv
 models/mistral
+azure_config.json

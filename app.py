@@ -68,10 +68,13 @@ if st.button("Analyser"):
 import openai
 
 
-AZURE_OPENAI_ENDPOINT = ""
-AZURE_OPENAI_API_KEY = ""
-AZURE_DEPLOYMENT_NAME = "gpt-35-turbo-16k" 
-AZURE_API_VERSION = "2024-08-01-preview"  
+with open('azure_config.json', 'r') as config_file:
+    azure_config = json.load(config_file)
+
+AZURE_OPENAI_ENDPOINT = azure_config['AZURE_OPENAI_ENDPOINT']
+AZURE_OPENAI_API_KEY = azure_config['AZURE_OPENAI_API_KEY']
+AZURE_DEPLOYMENT_NAME = azure_config['AZURE_DEPLOYMENT_NAME']
+AZURE_API_VERSION = azure_config['AZURE_API_VERSION']
 
 
 client = openai.AzureOpenAI(
