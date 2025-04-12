@@ -12,3 +12,4 @@ models/vectorizer.pkl
 models/filtered_phishing_emails.csv
 models/mistral
 azure_config.json
+mistral_key.txt

@@ -75,7 +75,32 @@ if st.button("Analyser"):
 
 
 import openai
+import random
+import json
+from mistralai import Mistral
 
+
+
+
+
+examples_df = pd.read_csv("models/filtered_phishing_emails.csv")
+examples=examples_df['phishing_email'].tolist()
+
+
+
+
+
+
+
+
+email_themes = [
+    "Financial and Payment-Related Subjects",
+    "Security and Account-Related Subjects",
+    "Offers and Promotions",
+    "Work and Business-Related Subjects",
+    "Delivery and Shipping",
+    "Miscellaneous"
+]
 
 with open('azure_config.json', 'r') as config_file:
     azure_config = json.load(config_file)
@@ -86,19 +111,28 @@ AZURE_DEPLOYMENT_NAME = azure_config['AZURE_DEPLOYMENT_NAME']
 AZURE_API_VERSION = azure_config['AZURE_API_VERSION']
 
 
-client = openai.AzureOpenAI(
+client_gpt = openai.AzureOpenAI(
     azure_endpoint=AZURE_OPENAI_ENDPOINT,
     api_key=AZURE_OPENAI_API_KEY,
     api_version=AZURE_API_VERSION,
 )
 
-examples_df = pd.read_csv("models/filtered_phishing_emails.csv").sample(n=5)
-examples=examples_df['phishing_email'].tolist()
+with open('mistral_key.txt', 'r') as file:
+            mistral_api_key = file.readline().strip()
 
+mistral_model = "open-mixtral-8x22b"
 
-def generate_phishing_email(entry, examples=examples,type="person",language="french"):
+client_mistral = Mistral(api_key=mistral_api_key)
+
+def generate_phishing_email(entry, examples=examples,type="individual",model=None,theme=None,language="french"):
+    if not theme:
+        theme = random.choice(email_themes)
+    if not model:
+        model = random.choice(["gpt","mistral"])
+        
+    sample_examples = random.sample(examples, 5)
     prompt = f""" 
-You are an advanced AI trained in cybersecurity awareness. Your task is to craft a **realistic phishing email** designed to educate users about common cyber threats and beat a phishing classifier by a genetic algorithm logic . Given a dictionary containing a {type}’s characteristics {entry.to_dict()}, generate a phishing email {"template" if type!="individual" else ""} that is **highly personalized** to increase credibility.
+You are an advanced AI trained in cybersecurity awareness. Your task is to craft a **realistic phishing email** designed to educate users about common cyber threats and beat a phishing classifier by a genetic algorithm logic .  Given a dictionary containing a {type}’s characteristics {entry.to_dict()}, generate a phishing email {"template" if type!="individual" else ""} that is **highly personalized** to increase credibility.
 
 ---
 
@@ -107,23 +141,41 @@ You are an advanced AI trained in cybersecurity awareness. Your task is to craft
 - Use a **convincing sender name and email** (e.g., a trusted organization, a financial service, or a known brand).
 - Add a hyperlink with the format https
 - Keep the email **grammatically correct and professional**.
+-If there is no specific info on the target make the theme {theme}, however if there is a specific info on the target, use it to make the email more realistic by making the specific info the theme.
 
 
-Take inspiration from these previous mails that haven't been flagged : {" ".join(examples)}. Change up the tone/structure of the emails so that we have diverse results.
+Take inspiration from these previous mails that haven't been flagged : {"\n".join(sample_examples)}. Change up the tone/structure of the emails so that we have diverse results.
 IMPORTANT: The language of the email should be in {language}.
 
 
 """
-    messages = [
-        {"role": "user", "content": prompt}
-    ]
-    response = client.chat.completions.create(
-        model=AZURE_DEPLOYMENT_NAME,
-        messages=messages,
-        temperature=0.5,
-        top_p=0.9,
-    )
-    return response.choices[0].message.content
+
+    if model == "gpt":
+        messages = [
+            {"role": "user", "content": prompt}
+        ]
+        response = client_gpt.chat.completions.create(
+            model=AZURE_DEPLOYMENT_NAME,
+            messages=messages,
+            temperature=0.5,
+            top_p=0.9,
+        )
+        return response.choices[0].message.content
+    else:
+        
+
+        chat_response = client_mistral.chat.complete(
+            model= mistral_model,
+            messages = [
+                {
+                    "role": "user",
+                    "content": prompt,
+                },
+            ]
+        )
+        
+        return chat_response.choices[0].message.content
+
 
 
 
@@ -203,7 +255,7 @@ def generate_email_template(group_characteristics):
         "location": group_characteristics.get("common_location", "Inconnu"),
         "Description": group_characteristics.get("common_description", "")
     })
-    return generate_phishing_email(entry,type="groupe",language=language)
+    return generate_phishing_email(entry,type="groupe",theme=group_characteristics.get("common_description", None),language=language)
 
 def display_email_template(email_template):
     st.write("Template d'email généré pour le groupe :")
