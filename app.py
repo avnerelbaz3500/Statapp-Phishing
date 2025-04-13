@@ -78,7 +78,7 @@ client_gpt = openai.AzureOpenAI(
 
 def predict_email_gpt(email_text):
     prompt = f"""
-Tu es un expert en cybersécurité. Ta tâche est de classifier l'email ci-dessous comme "Phishing" ou "Légitime". , et de donner un pourcentage de probabilité de cette classification.
+Tu es un expert en cybersécurité. Ta tâche est de classifier l'email ci-dessous comme "Phishing" ou "Légitime", et de donner un pourcentage de probabilité de cette classification.
 Le pourcentage doit représenter la confiance que tu as dans cette classification.
 
 
