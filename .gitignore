@@ -2,5 +2,5 @@ data/adult.csv
 data/.DS_Store
 data/phishing_emails.csv
 data/merged_data.csv
-
+azure_config.json
 phishing_data.jsonl
