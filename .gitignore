@@ -1,6 +1,5 @@
-data/adult.csv
-data/.DS_Store
-data/phishing_emails.csv
-data/merged_data.csv
-
+data/*
+azure_config.json
 phishing_data.jsonl
+filtered_phishing_emails.csv
+mistral_key.txt
