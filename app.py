@@ -15,15 +15,16 @@ from types import ModuleType
 import json
 import openai
 import pandas as pd
-
-
+import random
+from mistralai import Mistral
 
 
 # Charger le modèle entraîné et le vectorizer
-vectorizer = pickle.load(open("models/vectorizer.pkl", "rb"))
-model = pickle.load(open("models/multinomial_nb_model.pkl", "rb"))
+vectorizer = pickle.load(open("vectorizer.pkl", "rb"))
+model = pickle.load(open("model.pkl", "rb"))
 
 def clean_text(text):
+    """ Nettoyage du texte en accord avec l'entraînement du modèle """
     try:
         text = unicodedata.normalize("NFKC", text)
     except:
@@ -46,7 +47,8 @@ def stop_lem(text):
 def preprocessing(text):
     return stop_lem(clean_text(text))
 
-def predict_email(email_text_cleaned,display_percentage=False):
+#Prédiction avec le Naive Bayes Model
+def predict_email_nb(email_text_cleaned,display_percentage=False):
     email_vectorized = vectorizer.transform([email_text_cleaned])
     prediction = model.predict(email_vectorized)
     if display_percentage:
@@ -59,27 +61,103 @@ def predict_email(email_text_cleaned,display_percentage=False):
     
     return "Phishing" if prediction[0] == 1 else "Légitime"
 
+# Prédiction avec GPT
 
+with open('azure_config.json', 'r') as config_file:
+    azure_config = json.load(config_file)
+
+AZURE_OPENAI_ENDPOINT = azure_config['AZURE_OPENAI_ENDPOINT']
+AZURE_OPENAI_API_KEY = azure_config['AZURE_OPENAI_API_KEY']
+AZURE_DEPLOYMENT_NAME = azure_config['AZURE_DEPLOYMENT_NAME']
+AZURE_API_VERSION = azure_config['AZURE_API_VERSION']
+
+
+client_gpt = openai.AzureOpenAI(
+    azure_endpoint=AZURE_OPENAI_ENDPOINT,
+    api_key=AZURE_OPENAI_API_KEY,
+    api_version=AZURE_API_VERSION,
+)
+
+def predict_email_gpt(email_text):
+    prompt = f"""
+Tu es un expert en cybersécurité. Ta tâche est de classifier l'email ci-dessous comme "Phishing" ou "Légitime". , et de donner un pourcentage de probabilité de cette classification.
+Le pourcentage doit représenter la confiance que tu as dans cette classification.
+
+
+Email :
+---
+{email_text}
+---
+
+  Exemple de réponse : 
+    - "Phishing (90%)"
+    - "Légitime (70%)"
+"""
+    messages = [{"role": "user", "content": prompt}]
+    response = client_gpt.chat.completions.create(
+        model=AZURE_DEPLOYMENT_NAME,
+        messages=messages,
+        temperature=0.0
+    )
+    return response.choices[0].message.content.strip()
+
+#Prédiction avec Mistral 
+
+with open('mistral_key.txt', 'r') as file:
+            mistral_api_key = file.readline().strip()
+
+mistral_model = "open-mixtral-8x22b"
+
+client_mistral = Mistral(api_key=mistral_api_key)
+
+def predict_email_mistral(email_text):
+    prompt = f"""
+    Tu es un expert en cybersécurité. Ta tâche est de classifier l'email ci-dessous comme "Phishing" ou "Légitime", et de donner un pourcentage de probabilité de cette classification.
+    Le pourcentage doit représenter la confiance que tu as dans cette classification.
+    Tu ne dois pas fournir de justifications
+
+    Email :
+    ---
+    {email_text}
+    ---
+
+    Exemple de réponse : 
+    - "Phishing (90%)"
+    - "Légitime (70%)"
+    """
+    messages = [{"role": "user", "content": prompt}]
+    response = client_mistral.chat.complete(
+        model=mistral_model,
+        messages=messages,
+        temperature=0.0
+    )
+    return response.choices[0].message.content.strip()
+
+
+# Interface Streamlit
 st.title("Détection de Phishing")
-
 st.write("Entrez un email ci-dessous et nous vous dirons s'il est suspect.")
 
 email_input = st.text_area("Collez votre email ici")
 
-if st.button("Analyser"):
-    result = predict_email(email_input,display_percentage=True)
-    st.write(f"Résultat : {result}")
+method = st.radio("Méthode d’analyse :", ["Modèle Naive Bayes", "Modèle GPT", "Modèle Mistral"])
 
+if st.button("Analyser"):
+    if not email_input.strip():
+        st.warning("Veuillez entrer un email.")
+    else:
+        if method == "Modèle Naive Bayes":
+            result = predict_email_nb(email_input,display_percentage=True)
+            st.success(f"Résultat : {result}")
+        elif method == "Modèle GPT":
+                result = predict_email_gpt(email_input)
+                st.success(f"Résultat : {result}")
+        elif method == "Modèle Mistral":
+            result = predict_email_mistral(email_input)
+            st.success(f"Résultat : {result}")
+                
 
 # Section to generate an email based on user characteristics
-
-
-import openai
-import random
-import json
-from mistralai import Mistral
-
-
 
 
 
@@ -102,28 +180,6 @@ email_themes = [
     "Miscellaneous"
 ]
 
-with open('azure_config.json', 'r') as config_file:
-    azure_config = json.load(config_file)
-
-AZURE_OPENAI_ENDPOINT = azure_config['AZURE_OPENAI_ENDPOINT']
-AZURE_OPENAI_API_KEY = azure_config['AZURE_OPENAI_API_KEY']
-AZURE_DEPLOYMENT_NAME = azure_config['AZURE_DEPLOYMENT_NAME']
-AZURE_API_VERSION = azure_config['AZURE_API_VERSION']
-
-
-client_gpt = openai.AzureOpenAI(
-    azure_endpoint=AZURE_OPENAI_ENDPOINT,
-    api_key=AZURE_OPENAI_API_KEY,
-    api_version=AZURE_API_VERSION,
-)
-
-with open('mistral_key.txt', 'r') as file:
-            mistral_api_key = file.readline().strip()
-
-mistral_model = "open-mixtral-8x22b"
-
-client_mistral = Mistral(api_key=mistral_api_key)
-
 def generate_phishing_email(entry, examples=examples,type="individual",model=None,theme=None,language="french"):
     if not theme:
         theme = random.choice(email_themes)
@@ -131,6 +187,7 @@ def generate_phishing_email(entry, examples=examples,type="individual",model=Non
         model = random.choice(["gpt","mistral"])
         
     sample_examples = random.sample(examples, 5)
+    joined_examples = "\n".join(sample_examples)
     prompt = f""" 
 You are an advanced AI trained in cybersecurity awareness. Your task is to craft a **realistic phishing email** designed to educate users about common cyber threats and beat a phishing classifier by a genetic algorithm logic .  Given a dictionary containing a {type}’s characteristics {entry.to_dict()}, generate a phishing email {"template" if type!="individual" else ""} that is **highly personalized** to increase credibility.
 
@@ -144,7 +201,7 @@ You are an advanced AI trained in cybersecurity awareness. Your task is to craft
 -If there is no specific info on the target make the theme {theme}, however if there is a specific info on the target, use it to make the email more realistic by making the specific info the theme.
 
 
-Take inspiration from these previous mails that haven't been flagged : {"\n".join(sample_examples)}. Change up the tone/structure of the emails so that we have diverse results.
+Take inspiration from these previous mails that haven't been flagged : {joined_examples}. Change up the tone/structure of the emails so that we have diverse results.
 IMPORTANT: The language of the email should be in {language}.
 
 
