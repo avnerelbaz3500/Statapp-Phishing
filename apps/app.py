@@ -181,6 +181,17 @@ email_themes = [
 ]
 
 def generate_phishing_email(entry, examples=examples,type="individual",model=None,theme=None,language="french"):
+    """ 
+    Generate a phishing email based on the target(individual of group)'s profile, a set of examples, a theme, a model, and a language.
+    - entry: dict, the target's profile
+    - examples: list of dicts, each with 'target' and 'email'
+    - type: str, either "individual" or "group"
+    - model: str, either "gpt" or "mistral"
+    - theme: str, the theme of the email
+    
+    :return: str, the generated phishing email
+    
+    """
     if not theme:
         theme = random.choice(email_themes)
     if not model:
