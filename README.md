@@ -40,7 +40,7 @@ Phishing/
 ├── LICENSE
 ├── .gitignore
 └── requirements.txt           # All dependencies
-\`\`\`
+\`\`\
 
 ---
 
