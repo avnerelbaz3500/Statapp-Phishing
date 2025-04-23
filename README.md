@@ -11,7 +11,7 @@ This project combines classical NLP and modern generative AI to simulate adversa
 
 ##  Project Structure
 
-\`\`\`
+```bash
 Phishing/
 │
 ├── apps/
@@ -40,7 +40,7 @@ Phishing/
 ├── LICENSE
 ├── .gitignore
 └── requirements.txt           # All dependencies
-\`\`\
+```
 
 ---
 
