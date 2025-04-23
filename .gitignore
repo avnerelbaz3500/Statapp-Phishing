@@ -3,3 +3,4 @@ azure_config.json
 phishing_data.jsonl
 mistral_key.txt
 venv/
+main.py

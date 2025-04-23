@@ -20,8 +20,8 @@ from mistralai import Mistral
 
 
 # Charger le modèle entraîné et le vectorizer
-vectorizer = pickle.load(open("vectorizer.pkl", "rb"))
-model = pickle.load(open("model.pkl", "rb"))
+vectorizer = pickle.load(open("models/vectorizer.pkl", "rb"))
+model = pickle.load(open("models/multinomial_nb_model.pkl", "rb"))
 
 def clean_text(text):
     """ Nettoyage du texte en accord avec l'entraînement du modèle """
@@ -162,7 +162,7 @@ if st.button("Analyser"):
 
 
 examples_df = pd.read_csv("models/filtered_phishing_emails.csv")
-examples=examples_df['phishing_email'].tolist()
+examples=examples_df['email'].tolist()
 
 
 
