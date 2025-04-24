@@ -47,32 +47,32 @@ Phishing/
 ##  Installation
 
 1. **Clone the repo:**
-\`\`\`bash
+```bash
 git clone https://github.com/avnerelbaz3500/Statapp-Phishing/
 cd phishing
-\`\`\`
+```
 
 2. **Create a virtual environment (optional but recommended):**
-\`\`\`bash
+```bash
 python -m venv venv
 source venv/bin/activate    # On Windows: venv\\Scripts\\activate
-\`\`\`
+```
 
 3. **Install dependencies:**
-\`\`\`bash
+```bash
 pip install -r requirements.txt
-\`\`\`
+```
 
 4. **Set up API keys:**
 - Create a file \`azure_config.json\`:
-\`\`\`json
+```json
 {
   \"AZURE_OPENAI_ENDPOINT\": \"https://<your-endpoint>.openai.azure.com/\",
   \"AZURE_OPENAI_API_KEY\": \"<your-key>\",
   \"AZURE_DEPLOYMENT_NAME\": \"<your-deployment-name>\",
   \"AZURE_API_VERSION\": \"2023-12-01-preview\"
 }
-\`\`\`
+```
 
 - Create a file \`mistral_key.txt\` with your Mistral API key inside.
 
@@ -82,9 +82,9 @@ pip install -r requirements.txt
 
 From the root of the project, launch the app using:
 
-\`\`\`bash
+```bash
 streamlit run apps/app.py
-\`\`\`
+```
 
 This will open a local web interface for testing your emails against the trained classifier.
 
