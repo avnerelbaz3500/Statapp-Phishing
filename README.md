@@ -15,7 +15,7 @@ This project combines classical NLP and modern generative AI to simulate adversa
 Phishing/
 │
 ├── apps/
-│   └── app.py                 # Streamlit interface to test email classification
+│   └── ...                 # Apps in dev
 │
 ├── data/                      # CSV datasets
 │   ├── adult_data.csv
@@ -32,6 +32,8 @@ Phishing/
 │
 ├── venv/                      # Virtual environment
 │
+├── app.py                     # Streamlit app with Mistral integration
+├── app_no_mistral.py          # Streamlit app without Mistral integration
 ├── main.ipynb                 # Jupyter Notebook for full pipeline
 ├── main.py                    # Converted version of main.ipynb
 ├── azure_config.json          # Azure OpenAI config (not versioned)

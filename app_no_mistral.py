@@ -16,7 +16,7 @@ import json
 import openai
 import pandas as pd
 import random
-from mistralai import Mistral
+
 
 
 # Charger le modèle entraîné et le vectorizer
@@ -101,37 +101,11 @@ Email :
     )
     return response.choices[0].message.content.strip()
 
-#Prédiction avec Mistral 
 
-with open('mistral_key.txt', 'r') as file:
-            mistral_api_key = file.readline().strip()
 
-mistral_model = "open-mixtral-8x22b"
 
-client_mistral = Mistral(api_key=mistral_api_key)
 
-def predict_email_mistral(email_text):
-    prompt = f"""
-    Tu es un expert en cybersécurité. Ta tâche est de classifier l'email ci-dessous comme "Phishing" ou "Légitime", et de donner un pourcentage de probabilité de cette classification.
-    Le pourcentage doit représenter la confiance que tu as dans cette classification.
-    Tu ne dois pas fournir de justifications
 
-    Email :
-    ---
-    {email_text}
-    ---
-
-    Exemple de réponse : 
-    - "Phishing (90%)"
-    - "Légitime (70%)"
-    """
-    messages = [{"role": "user", "content": prompt}]
-    response = client_mistral.chat.complete(
-        model=mistral_model,
-        messages=messages,
-        temperature=0.0
-    )
-    return response.choices[0].message.content.strip()
 
 def collect_group_characteristics():
     st.subheader("Caractéristiques générales du groupe")
@@ -179,13 +153,13 @@ email_themes = [
     "Miscellaneous"
 ]
 
-def generate_phishing_email(entry, examples=examples,type="individual",model=None,theme=None,language="french"):
+def generate_phishing_email(entry, examples=examples,type="individual",model="gpt",theme=None,language="french"):
     """ 
     Generate a phishing email based on the target(individual of group)'s profile, a set of examples, a theme, a model, and a language.
     - entry: dict, the target's profile
     - examples: list of dicts, each with 'target' and 'email'
     - type: str, either "individual" or "group"
-    - model: str, either "gpt" or "mistral"
+    - model: str, either "gpt"
     - theme: str, the theme of the email
     
     :return: str, the generated phishing email
@@ -193,8 +167,7 @@ def generate_phishing_email(entry, examples=examples,type="individual",model=Non
     """
     if not theme:
         theme = random.choice(email_themes)
-    if not model:
-        model = random.choice(["gpt","mistral"])
+
         
     sample_examples = random.sample(examples, 5)
     joined_examples = "\n".join(sample_examples)
@@ -228,20 +201,8 @@ IMPORTANT: The language of the email should be in {language}.
             top_p=0.9,
         )
         return response.choices[0].message.content
-    else:
         
-
-        chat_response = client_mistral.chat.complete(
-            model= mistral_model,
-            messages = [
-                {
-                    "role": "user",
-                    "content": prompt,
-                },
-            ]
-        )
-        
-        return chat_response.choices[0].message.content
+    
 
 def parse_user_data(file):
     try:
@@ -276,7 +237,7 @@ tab1, tab2, tab3 = st.tabs(["Détection d'Email", "Génération Individuelle", "
 with tab1:
     st.title("Détection de Phishing")
     email_input = st.text_area("Collez votre email ici")
-    method = st.radio("Méthode d’analyse :", ["Modèle Naive Bayes", "Modèle GPT", "Modèle Mistral"])
+    method = st.radio("Méthode d’analyse :", ["Modèle Naive Bayes", "Modèle GPT"])
 
     if st.button("Analyser"):
         if not email_input.strip():
@@ -286,8 +247,6 @@ with tab1:
                 result = predict_email_nb(email_input, display_percentage=True)
             elif method == "Modèle GPT":
                 result = predict_email_gpt(email_input)
-            else:
-                result = predict_email_mistral(email_input)
             st.success(f"Résultat : {result}")
 
 with tab2:
