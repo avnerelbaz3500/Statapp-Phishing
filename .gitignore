@@ -3,4 +3,5 @@ azure_config.json
 phishing_data.jsonl
 mistral_key.txt
 venv/
+openai_key.txt
 main.py
