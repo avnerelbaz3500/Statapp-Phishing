@@ -5,3 +5,4 @@ mistral_key.txt
 venv/
 openai_key.txt
 main.py
+generated_phishing_emails.csv
