@@ -7,3 +7,4 @@ openai_key.txt
 main.py
 generated_phishing_emails.csv
 models/phi2
+images/*
