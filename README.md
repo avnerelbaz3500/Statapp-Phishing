@@ -38,6 +38,7 @@ Phishing/
 ├── main.py                    # Converted version of main.ipynb
 ├── azure_config.json          # Azure OpenAI config (not versioned)
 ├── mistral_key.txt            # Mistral API key (not versioned)
+├── Kaggle_code.ipynb          # Code used on Kaggle to train and evaluate the fine-tuned phi2 model
 ├── README.md
 ├── LICENSE
 ├── .gitignore
